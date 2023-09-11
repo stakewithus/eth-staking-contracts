@@ -1,0 +1,20 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+[rpc_endpoints]
+mainnet = "${RPC_MAINNET}"
+goerli = "${RPC_GOERLI}"
+
+[etherscan]
+mainnet = { key = "${ETHERSCAN_API_KEY}" }
+goerli = { key = "${ETHERSCAN_API_KEY}" }
+
+[profile.unit]
+test = "test/unit"
+
+[profile.integration]
+test = "test/integration"
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
