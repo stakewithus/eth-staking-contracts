@@ -20,6 +20,9 @@ contract FeeRecipientTest is Test {
         feeRecipient = FeeRecipient(payable(staking.registry(user)));
     }
 
+    event ClaimRewards(uint256 amount);
+    event TreasuryClaim(uint256 amount);
+
     function test_claimRewards(uint256 amount_) public {
         vm.assume(amount_ > 0 && amount_ < type(uint248).max);
         vm.deal(address(feeRecipient), amount_);
@@ -31,6 +34,12 @@ contract FeeRecipientTest is Test {
 
         assertEq(toUser, feeRecipient.unclaimedRewards());
 
+        if (toTreasury > 0) {
+            vm.expectEmit();
+            emit TreasuryClaim(toTreasury);
+        }
+        vm.expectEmit();
+        emit ClaimRewards(toUser);
         vm.prank(user);
         feeRecipient.claimRewards();
 
@@ -50,11 +59,17 @@ contract FeeRecipientTest is Test {
 
         assertEq(toUser, feeRecipient.unclaimedRewards());
 
+        if (toTreasury > 0) {
+            vm.expectEmit();
+            emit TreasuryClaim(toTreasury);
+        }
         vm.prank(treasury);
         feeRecipient.treasuryClaim();
 
         assertEq(toUser, feeRecipient.unclaimedRewards());
 
+        vm.expectEmit();
+        emit ClaimRewards(toUser);
         vm.prank(user);
         feeRecipient.claimRewards();
 

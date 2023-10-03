@@ -19,6 +19,9 @@ contract FeeRecipient is StakingConstants {
     /// @dev Unclaimed rewards that fully belong to user.
     uint256 internal _userRewards;
 
+    event ClaimRewards(uint256 amount);
+    event TreasuryClaim(uint256 amount);
+
     error Unauthorized();
 
     constructor(address user_) {
@@ -36,9 +39,10 @@ contract FeeRecipient is StakingConstants {
     function claimRewards() external onlyUser {
         _treasuryClaim();
 
-        SafeTransferLib.safeTransferETH(user, address(this).balance);
-
+        emit ClaimRewards(address(this).balance);
         _userRewards = 0;
+
+        SafeTransferLib.safeTransferETH(user, address(this).balance);
     }
 
     function treasuryClaim() external onlyTreasury {
@@ -50,6 +54,7 @@ contract FeeRecipient is StakingConstants {
         uint256 toTreasury = _calcToTreasury(share);
         if (toTreasury == 0) return; // Do nothing as treasury has nothing to claim.
 
+        emit TreasuryClaim(toTreasury);
         _userRewards += share - toTreasury;
 
         SafeTransferLib.safeTransferETH(staking.treasury(), toTreasury);
