@@ -125,4 +125,44 @@ contract StakingTest is Test {
 
         assertEq(address(user).balance, balance);
     }
+
+    event OneTimeFeeSet(uint256);
+
+    function test_setOneTimeFee_reverts_if_there_are_pending_validators() public {
+        assertEq(staking.oneTimeFee(), 1 ether);
+
+        vm.prank(user);
+        staking.deposit{value: 33 ether}(user);
+
+        assertGt(staking.totalPendingValidators(), 0);
+
+        vm.expectRevert(Staking.PendingValidators.selector);
+        staking.setOneTimeFee(2 ether);
+
+        assertEq(staking.oneTimeFee(), 1 ether);
+
+        staking.refundUser(user, 1);
+
+        assertEq(staking.totalPendingValidators(), 0);
+
+        vm.expectEmit();
+        emit OneTimeFeeSet(2 ether);
+        staking.setOneTimeFee(2 ether);
+
+        assertEq(staking.oneTimeFee(), 2 ether);
+    }
+
+    function test_setRefundDelay_cannot_exceed_maximum(uint256 amount_) public {
+        vm.assume(amount_ > 0 && amount_ < type(uint240).max);
+
+        vm.expectRevert(Staking.InvalidAmount.selector);
+        staking.setRefundDelay(7 days + amount_);
+    }
+
+    function test_setPerformanceFee_cannot_exceed_maximum(uint256 amount_) public {
+        vm.assume(amount_ > 0 && amount_ < type(uint240).max);
+
+        vm.expectRevert(Staking.InvalidAmount.selector);
+        staking.setPerformanceFee(10_000 + amount_);
+    }
 }
