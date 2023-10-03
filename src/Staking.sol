@@ -13,7 +13,7 @@ import {StakingConstants} from "src/StakingConstants.sol";
 contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants {
     /// @notice Ethereum staking deposit contract address.
     address public immutable depositContract;
-    /// @notice Unagii treasury which receives share of profit from execution layer rewards.
+    /// @notice stakewith.us treasury which receives share of profit from execution layer rewards.
     address public treasury;
     /// @notice One-time fee for creating a new validator.
     uint256 public oneTimeFee;
@@ -68,7 +68,7 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
 	//////////////////////////////////////*/
 
     /**
-     * @notice Deposits ETH into this contract for Unagii to create a new validator node on user's behalf.
+     * @notice Deposits ETH into this contract for stakewith.us to create a new validator node on user's behalf.
      * @param user_ User's withdrawal address which receives consensus rewards and can claim execution layer rewards.
      * @dev `msg.value` must be a multiple of `_DEPOSIT_AMOUNT (32 ether) + oneTimeFee`
      */

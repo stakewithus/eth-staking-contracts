@@ -116,7 +116,7 @@ contract StakingTest is Test {
 
     function test_refund(uint8 validators_, uint256 oneTimeFee_) public {
         vm.assume(validators_ > 0 && validators_ < 140);
-        vm.assume(oneTimeFee_ <= 1 ether);
+        vm.assume(oneTimeFee_ < 1 ether);
 
         staking.setOneTimeFee(oneTimeFee_);
 

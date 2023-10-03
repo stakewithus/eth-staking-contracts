@@ -62,6 +62,8 @@ contract FeeRecipientTest is Test {
         if (toTreasury > 0) {
             vm.expectEmit();
             emit TreasuryClaim(toTreasury);
+        } else {
+            vm.expectRevert(FeeRecipient.NothingToClaim.selector);
         }
         vm.prank(treasury);
         feeRecipient.treasuryClaim();
@@ -76,5 +78,12 @@ contract FeeRecipientTest is Test {
         assertEq(treasury.balance, toTreasury);
         assertEq(user.balance, userBalance + toUser);
         assertEq(feeRecipient.unclaimedRewards(), 0);
+    }
+
+    function test_claimRewards_reverts_if_nothing_to_claim() public {
+        assertEq(feeRecipient.unclaimedRewards(), 0);
+        vm.expectRevert(FeeRecipient.NothingToClaim.selector);
+        vm.prank(user);
+        feeRecipient.claimRewards();
     }
 }

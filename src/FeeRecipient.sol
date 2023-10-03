@@ -23,6 +23,7 @@ contract FeeRecipient is StakingConstants {
     event TreasuryClaim(uint256 amount);
 
     error Unauthorized();
+    error NothingToClaim();
 
     constructor(address user_) {
         staking = IStaking(payable(msg.sender));
@@ -32,11 +33,13 @@ contract FeeRecipient is StakingConstants {
     /// @dev To receive MEV bribes directly transferred to `fee_recipient`.
     receive() external payable {}
 
-    function unclaimedRewards() external view returns (uint256) {
+    function unclaimedRewards() public view returns (uint256) {
         return address(this).balance - _calcToTreasury(address(this).balance - _userRewards);
     }
 
     function claimRewards() external onlyUser {
+        if (unclaimedRewards() == 0) revert NothingToClaim();
+
         _treasuryClaim();
 
         emit ClaimRewards(address(this).balance);
@@ -46,6 +49,7 @@ contract FeeRecipient is StakingConstants {
     }
 
     function treasuryClaim() external onlyTreasury {
+        if (_calcToTreasury(address(this).balance - _userRewards) == 0) revert NothingToClaim();
         _treasuryClaim();
     }
 
