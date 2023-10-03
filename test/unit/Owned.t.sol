@@ -45,6 +45,10 @@ contract OwnedTest is Test {
 
         address newOperator = address(3);
 
+        vm.expectRevert(Owned.ZeroAddress.selector);
+        vm.prank(owner);
+        owned.setOperator(address(0));
+
         vm.expectRevert(Owned.Unauthorized.selector);
         owned.setOperator(newOperator);
 

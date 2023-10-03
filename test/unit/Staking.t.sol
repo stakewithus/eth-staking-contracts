@@ -4,6 +4,8 @@ pragma solidity 0.8.13;
 import "forge-std/Test.sol";
 import {Staking} from "src/Staking.sol";
 import {IDepositContract} from "src/interfaces/IDepositContract.sol";
+import {IStaking} from "src/interfaces/IStaking.sol";
+import {Owned} from "src/lib/Owned.sol";
 import {Pausable} from "src/lib/Pausable.sol";
 import {FeeRecipient} from "src/FeeRecipient.sol";
 
@@ -53,6 +55,25 @@ contract StakingTest is Test {
         address payable feeRecipient = payable(staking.registry(user));
         assertTrue(feeRecipient != address(0));
         assertEq(FeeRecipient(feeRecipient).user(), user);
+
+        // Subsequent deposit reverts as user has pending validators.
+        vm.expectRevert(Staking.PendingValidators.selector);
+        vm.prank(user);
+        staking.deposit{value: 33 ether}(user);
+
+        vm.prank(user);
+        staking.refund();
+
+        assertEq(staking.pendingValidators(user), 0);
+
+        // User can deposit again if pending validators == 0.
+        vm.expectEmit();
+        emit Deposit(user, user, validators_);
+        vm.prank(user);
+        staking.deposit{value: validators_ * 33 ether}(user);
+
+        // Fee recipient did not change on subsequent deposit.
+        assertEq(feeRecipient, staking.registry(user));
     }
 
     function test_receive(uint8 validators_) public {
@@ -71,6 +92,11 @@ contract StakingTest is Test {
 
         assertEq(staking.pendingValidators(user), validators_);
         assertEq(address(staking).balance, validators_ * 33 ether);
+    }
+
+    function test_deposit_reverts_if_zero_address() public {
+        vm.expectRevert(Owned.ZeroAddress.selector);
+        staking.deposit{value: 33 ether}(address(0));
     }
 
     function test_deposit_reverts_on_invalid_amount(uint256 amount_) public {
@@ -124,6 +150,38 @@ contract StakingTest is Test {
         staking.refund();
 
         assertEq(address(user).balance, balance);
+    }
+
+    function test_refund_reverts_if_no_pending_validators() public {
+        vm.expectRevert(Staking.NoDeposit.selector);
+        vm.prank(user);
+        staking.refund();
+
+        vm.prank(user);
+        staking.deposit{value: 33 ether}(user);
+
+        vm.expectRevert(Staking.NoDeposit.selector);
+        staking.refundUser(user, 0);
+    }
+
+    function test_stake_reverts_if_invalid_length() public {
+        vm.prank(user);
+        staking.deposit{value: 33 ether}(user);
+
+        IStaking.DepositData[] memory data = new IStaking.DepositData[](0);
+
+        vm.expectRevert(Staking.InvalidLength.selector);
+        staking.stake(user, data);
+
+        data = new IStaking.DepositData[](2);
+
+        bytes32 root = "0";
+
+        data[0] = IStaking.DepositData({pubkey: hex"00", signature: hex"00", deposit_data_root: root});
+        data[1] = IStaking.DepositData({pubkey: hex"ff", signature: hex"ff", deposit_data_root: root});
+
+        vm.expectRevert();
+        staking.stake(user, data);
     }
 
     event OneTimeFeeSet(uint256);
