@@ -50,9 +50,9 @@ contract FeeRecipient is StakingConstants {
         uint256 toTreasury = _calcToTreasury(share);
         if (toTreasury == 0) return; // Do nothing as treasury has nothing to claim.
 
-        SafeTransferLib.safeTransferETH(staking.treasury(), toTreasury);
-
         _userRewards += share - toTreasury;
+
+        SafeTransferLib.safeTransferETH(staking.treasury(), toTreasury);
     }
 
     function _calcToTreasury(uint256 amount_) internal view returns (uint256) {
