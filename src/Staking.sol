@@ -105,7 +105,6 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
      */
     function refund() external nonReentrant {
         uint256 validators = pendingValidators[msg.sender];
-        if (validators == 0) revert NoDeposit();
         if (block.timestamp < lastDepositTimestamp[msg.sender] + refundDelay) revert BeforeRefundDelay();
 
         _refund(msg.sender, validators);
@@ -185,6 +184,8 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
 	////////////////////////////////////////*/
 
     function _refund(address user_, uint256 validators_) internal {
+        if (validators_ == 0) revert NoDeposit();
+
         // This underflows, throwing an error if validators_ > pendingValidators[user_]
         pendingValidators[user_] -= validators_;
         totalPendingValidators -= validators_;
