@@ -15,6 +15,7 @@ abstract contract Owned {
     event NewOperator(address indexed oldOperator, address indexed newOperator);
 
     error Unauthorized();
+    error ZeroAddress();
 
     modifier onlyOwner() virtual {
         if (msg.sender != owner) revert Unauthorized();
@@ -32,6 +33,8 @@ abstract contract Owned {
     }
 
     constructor(address owner_, address operator_) {
+        if (owner_ == address(0)) revert ZeroAddress();
+        if (operator_ == address(0)) revert ZeroAddress();
         emit NewOwner(address(0), owner_);
         emit NewOperator(address(0), operator_);
         owner = owner_;
@@ -39,6 +42,7 @@ abstract contract Owned {
     }
 
     function setOperator(address operator_) public virtual onlyOwner {
+        if (operator_ == address(0)) revert ZeroAddress();
         emit NewOperator(operator, operator_);
         operator = operator_;
     }

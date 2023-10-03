@@ -39,6 +39,7 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
     error PendingValidators();
     error NoDeposit();
     error BeforeRefundDelay();
+    error SameValue();
 
     constructor(
         address owner_,
@@ -49,6 +50,7 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
         uint256 performanceFee_,
         uint256 refundDelay_
     ) Owned(owner_, operator_) {
+        if (depositContract_ == address(0)) revert ZeroAddress();
         depositContract = depositContract_;
         _setTreasury(treasury_);
         _setOneTimeFee(oneTimeFee_);
@@ -75,6 +77,7 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
     }
 
     function _deposit(address user_) internal whenNotPaused nonReentrant {
+        if (user_ == address(0)) revert ZeroAddress();
         if (pendingValidators[user_] > 0) revert PendingValidators();
 
         uint256 perValidator = _DEPOSIT_AMOUNT + oneTimeFee;
@@ -157,18 +160,23 @@ contract Staking is IStaking, ReentrancyGuard, Owned, Pausable, StakingConstants
 	/////////////////////////////////////*/
 
     function setOneTimeFee(uint256 oneTimeFee_) external onlyOwner {
+        if (oneTimeFee_ == oneTimeFee) revert SameValue();
         _setOneTimeFee(oneTimeFee_);
     }
 
     function setPerformanceFee(uint256 performanceFee_) external onlyOwner {
+        if (performanceFee_ == performanceFee) revert SameValue();
         _setPerformanceFee(performanceFee_);
     }
 
     function setTreasury(address treasury_) external onlyOwner {
+        if (treasury_ == address(0)) revert ZeroAddress();
+        if (treasury_ == treasury) revert SameValue();
         _setTreasury(treasury_);
     }
 
     function setRefundDelay(uint256 refundDelay_) external onlyOwner {
+        if (refundDelay_ == refundDelay) revert SameValue();
         _setRefundDelay(refundDelay_);
     }
 
