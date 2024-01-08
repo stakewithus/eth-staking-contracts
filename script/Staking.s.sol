@@ -13,7 +13,7 @@ contract Deploy is Script {
             operator_: vm.envAddress("OPERATOR"),
             depositContract_: _depositContract(),
             treasury_: vm.envAddress("TREASURY"),
-            oneTimeFee_: 1e17, // 0.1 ether
+            oneTimeFee_: 0,
             performanceFee_: 100, // 10%
             refundDelay_: 3 days
         });
@@ -24,6 +24,7 @@ contract Deploy is Script {
     function _depositContract() internal view returns (address) {
         if (block.chainid == 1) return 0x00000000219ab540356cBB839Cbe05303d7705Fa;
         else if (block.chainid == 5) return 0xff50ed3d0ec03aC01D4C79aAd74928BFF48a7b2b;
+        else if (block.chainid == 17000) return 0x4242424242424242424242424242424242424242;
         else revert("Unsupported chain.");
     }
 }

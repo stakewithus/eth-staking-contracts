@@ -11,6 +11,7 @@ goerli = "${RPC_GOERLI}"
 [etherscan]
 mainnet = { key = "${ETHERSCAN_API_KEY}" }
 goerli = { key = "${ETHERSCAN_API_KEY}" }
+holesky = { key = "${ETHERSCAN_API_KEY}" }
 
 [profile.unit]
 test = "test/unit"
