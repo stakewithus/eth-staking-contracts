@@ -1,6 +1,12 @@
 # ETH Staking Contracts
 
-### Setup
+## Addresses
+
+### Ethereum Mainnet
+
+Staking: `0xFB4022E94460ae7bd4d65EcD8214fbf574740494`
+
+## Setup
 
 ```shell
 forge install
