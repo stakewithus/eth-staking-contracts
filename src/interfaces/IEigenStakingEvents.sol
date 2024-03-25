@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-interface IStakingEvents {
-    event UserRegistered(address indexed user, address indexed feeRecipient);
+interface IEigenStakingEvents {
+    event UserRegistered(address indexed user, address indexed eigenUser);
     event Deposit(address indexed from, address indexed user, uint256 validators);
     event Staked(address indexed user, bytes[] pubkeys);
     event Refund(address indexed user, uint256 validators);

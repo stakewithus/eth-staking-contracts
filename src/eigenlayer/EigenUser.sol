@@ -11,7 +11,7 @@ contract EigenUser is StakingConstants {
     address public immutable user;
 
     IEigenPodManager public immutable eigenPodManager; // is this immutable?
-    IEigenPod public immutable eigenPod; //
+    IEigenPod public immutable eigenPod;
 
     error Unauthorized();
 

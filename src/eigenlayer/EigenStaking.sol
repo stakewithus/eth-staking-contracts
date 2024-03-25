@@ -3,14 +3,14 @@ pragma solidity 0.8.13;
 
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {IEigenStaking} from "src/interfaces/IEigenStaking.sol";
-import {IStakingEvents} from "src/interfaces/IStakingEvents.sol";
+import {IEigenStakingEvents} from "src/interfaces/IEigenStakingEvents.sol";
 import {Owned} from "src/lib/Owned.sol";
 import {Pausable} from "src/lib/Pausable.sol";
 import {SafeTransferLib} from "src/lib/SafeTransferLib.sol";
 import {EigenUser} from "src/eigenlayer/EigenUser.sol";
 import {StakingConstants} from "src/StakingConstants.sol";
 
-contract EigenStaking is IEigenStaking, IStakingEvents, ReentrancyGuard, Owned, Pausable, StakingConstants {
+contract EigenStaking is IEigenStaking, IEigenStakingEvents, ReentrancyGuard, Owned, Pausable, StakingConstants {
     /// @notice EigenPodManager address.
     address public immutable eigenPodManager;
     /// @notice Stakewithus treasury which receives share of profit from execution layer rewards.
@@ -50,10 +50,8 @@ contract EigenStaking is IEigenStaking, IStakingEvents, ReentrancyGuard, Owned, 
         uint256 performanceFee_,
         uint256 refundDelay_
     ) Owned(owner_, operator_) {
-        // TODO: more checks?
         if (eigenPodManager_ == address(0)) revert ZeroAddress();
         eigenPodManager = eigenPodManager_;
-
         _setTreasury(treasury_);
         _setOneTimeFee(oneTimeFee_);
         _setPerformanceFee(performanceFee_);
@@ -85,7 +83,6 @@ contract EigenStaking is IEigenStaking, IStakingEvents, ReentrancyGuard, Owned, 
         uint256 perValidator = _DEPOSIT_AMOUNT + oneTimeFee;
         if (msg.value == 0 || msg.value % perValidator != 0) revert InvalidAmount();
 
-        // TODO: Proxy!
         // Deploy EigenUser for address if its their first deposit.
         if (registry[user_] == address(0)) {
             address eigenUser = address(new EigenUser(user_, eigenPodManager));
